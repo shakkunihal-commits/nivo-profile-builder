@@ -1,239 +1,244 @@
-const STORAGE_KEY = 'nivo.profile.builder.v1';
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
-export const PRESET_LINKS = [
-  'Instagram',
-  'YouTube',
-  'WhatsApp',
-  'Spotify',
-  'Snapchat',
-  'Discord',
-  'X',
-  'Website',
-  'Portfolio',
-  'Google Maps',
-  'Custom Link',
-];
-
-export function makeId(prefix = 'id') {
-  return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2, 10)}`;
+:root {
+  --bg: #f5f1eb;
+  --panel: #f8f5f1;
+  --paper: #fbfaf7;
+  --text: #111111;
+  --muted: rgba(17, 17, 17, 0.68);
+  --line: rgba(17, 17, 17, 0.14);
+  --line-strong: rgba(17, 17, 17, 0.28);
+  --accent: #a92d2a;
+  --accent-soft: rgba(169, 45, 42, 0.1);
+  --shadow: 0 20px 50px rgba(17, 17, 17, 0.04);
 }
 
-export function slugify(value = '') {
-  return String(value)
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 80) || 'profile';
+* { box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
 }
 
-export function createLinkTemplate(title = 'Custom Link') {
-  return {
-    id: makeId('link'),
-    title: title || 'Custom Link',
-    url: '',
-    icon: '',
-    enabled: true,
-  };
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
 }
 
-export function getInitialProfile() {
-  return {
-    id: '',
-    slug: '',
-    name: '',
-    bio: '',
-    avatar: '',
-    location: '',
-    status: 'LIVE',
-    links: [createLinkTemplate('Instagram')],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
+a {
+  color: inherit;
+  text-decoration: none;
 }
 
-export function normalizeUrl(rawValue = '') {
-  const value = String(rawValue).trim();
+img {
+  display: block;
+  max-width: 100%;
+}
 
-  if (!value) return '';
+button, input, textarea {
+  font: inherit;
+}
 
-  if (/^[a-zA-Z][a-zA-Z\d+.-]*:/.test(value)) {
-    return value;
+.mono {
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.page-shell {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 28px 18px;
+}
+
+.profile-card {
+  width: min(100%, 560px);
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+  padding: 18px 18px 16px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.brand-block {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-wordmark {
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  font-weight: 700;
+  letter-spacing: 0.2em;
+}
+
+.meta-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.meta-label {
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 22px;
+  padding: 0 8px;
+  border: 1px solid var(--line-strong);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  background: var(--accent-soft);
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: 112px 1fr;
+  gap: 22px;
+  align-items: center;
+  padding: 26px 0 18px;
+}
+
+.avatar-wrap {
+  width: 112px;
+  height: 112px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1px solid var(--line-strong);
+  background: #e9e2d9;
+}
+
+.avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.identity {
+  min-width: 0;
+}
+
+.slug {
+  margin: 0 0 8px;
+  font-size: 9px;
+  color: var(--muted);
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(2.1rem, 4vw, 3.4rem);
+  line-height: 0.94;
+  letter-spacing: -0.06em;
+  font-weight: 600;
+}
+
+.location {
+  margin: 12px 0 0;
+  font-size: 9px;
+  color: var(--muted);
+}
+
+.bio {
+  margin: 18px 0 0;
+  max-width: 30ch;
+  font-size: 0.98rem;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.link-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.link-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 52px;
+  padding: 0 14px;
+  border: 1px solid var(--line-strong);
+  background: rgba(255, 255, 255, 0.24);
+  color: var(--text);
+  transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.link-item:hover,
+.link-item:focus-visible {
+  border-color: rgba(17, 17, 17, 0.5);
+  background: rgba(255, 255, 255, 0.38);
+  transform: translateY(-1px);
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--line-strong);
+  font-size: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.08em;
+  color: var(--text);
+  background: rgba(17, 17, 17, 0.02);
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 18px;
+  margin-top: 20px;
+  border-top: 1px solid var(--line);
+  font-size: 10px;
+  color: var(--muted);
+}
+
+@media (max-width: 480px) {
+  .profile-card {
+    padding: 14px 14px 12px;
   }
 
-  if (/^@/.test(value)) {
-    return `https://instagram.com/${value.slice(1)}`;
+  .topbar,
+  .brand-block,
+  .meta-row,
+  .footer {
+    gap: 8px;
   }
 
-  if (value.includes('@') && value.includes('.')) {
-    return `mailto:${value}`;
+  .hero {
+    grid-template-columns: 1fr;
+    gap: 18px;
+    text-align: left;
   }
 
-  if (/^\d[\d\s()+-]*$/.test(value)) {
-    return `tel:${value.replace(/\s+/g, '')}`;
+  .avatar-wrap {
+    width: 92px;
+    height: 92px;
   }
 
-  if (value.startsWith('www.')) {
-    return `https://${value}`;
+  .link-item {
+    min-height: 50px;
   }
-
-  return `https://${value}`;
-}
-
-export function isExternalUrl(url = '') {
-  return /^https?:\/\//i.test(url) || /^mailto:/i.test(url) || /^tel:/i.test(url);
-}
-
-export function getInitials(name = '') {
-  const words = String(name).trim().split(/\s+/).filter(Boolean);
-  if (!words.length) return 'N';
-  return words.slice(0, 2).map((word) => word[0]?.toUpperCase() || '').join('');
-}
-
-function readProfiles() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-      const seeded = getSeedProfiles();
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(seeded));
-      return seeded;
-    }
-
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch (error) {
-    console.error('Failed to read profiles:', error);
-    return [];
-  }
-}
-
-function writeProfiles(profiles) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(profiles));
-}
-
-export function getSeedProfiles() {
-  return [
-    {
-      id: 'profile-noah',
-      slug: 'noah-baker',
-      name: 'Noah Baker',
-      bio: 'Creative strategist / music / visual systems',
-      avatar:
-        'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80',
-      location: 'London, UK',
-      status: 'LIVE',
-      links: [
-        { id: 'link-1', title: 'Instagram', url: 'https://instagram.com/noahbaker', icon: 'IG', enabled: true },
-        { id: 'link-2', title: 'YouTube', url: 'https://youtube.com/@noahbaker', icon: 'YT', enabled: true },
-        { id: 'link-3', title: 'WhatsApp', url: 'https://wa.me/447700000000', icon: 'WA', enabled: true },
-        { id: 'link-4', title: 'Spotify', url: 'https://open.spotify.com/artist/123', icon: 'SP', enabled: true },
-      ],
-      createdAt: '2026-07-10T12:00:00.000Z',
-      updatedAt: '2026-09-18T11:15:00.000Z',
-    },
-    {
-      id: 'profile-mila',
-      slug: 'mila-ross',
-      name: 'Mila Ross',
-      bio: 'Photographer / journal / motion',
-      avatar:
-        'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=80',
-      location: 'Paris, FR',
-      status: 'SIGNAL',
-      links: [
-        { id: 'link-5', title: 'Portfolio', url: 'https://milaross.studio', icon: 'PF', enabled: true },
-        { id: 'link-6', title: 'Instagram', url: 'https://instagram.com/mila.ross', icon: 'IG', enabled: true },
-        { id: 'link-7', title: 'Discord', url: 'https://discord.com', icon: 'DC', enabled: false },
-      ],
-      createdAt: '2026-08-01T10:30:00.000Z',
-      updatedAt: '2026-09-29T15:20:00.000Z',
-    },
-  ];
-}
-
-export function ensureUniqueSlug(candidate = '', excludeId = null) {
-  const base = slugify(candidate || 'profile');
-  const profiles = readProfiles();
-  let slug = base;
-  let suffix = 1;
-
-  while (profiles.some((profile) => profile.id !== excludeId && profile.slug === slug)) {
-    slug = `${base}-${suffix}`;
-    suffix += 1;
-  }
-
-  return slug;
-}
-
-export function getProfiles() {
-  return readProfiles();
-}
-
-export function getProfile(id) {
-  return readProfiles().find((profile) => profile.id === id) ?? null;
-}
-
-export function getProfileBySlug(slug) {
-  const normalized = slugify(slug);
-  return readProfiles().find((profile) => slugify(profile.slug) === normalized) ?? null;
-}
-
-export function createProfile(profile) {
-  const profiles = readProfiles();
-  const cleanProfile = {
-    ...profile,
-    id: profile.id || makeId('profile'),
-    slug: ensureUniqueSlug(profile.slug || profile.name || 'profile'),
-    links: Array.isArray(profile.links) ? profile.links : [],
-    createdAt: profile.createdAt || new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
-
-  profiles.push(cleanProfile);
-  writeProfiles(profiles);
-  return cleanProfile;
-}
-
-export function updateProfile(profile) {
-  const profiles = readProfiles();
-  const index = profiles.findIndex((item) => item.id === profile.id);
-
-  if (index === -1) {
-    return createProfile(profile);
-  }
-
-  const updated = {
-    ...profiles[index],
-    ...profile,
-    slug: ensureUniqueSlug(profile.slug || profiles[index].slug || profile.name || 'profile', profile.id),
-    links: Array.isArray(profile.links) ? profile.links : profiles[index].links,
-    updatedAt: new Date().toISOString(),
-  };
-
-  profiles[index] = updated;
-  writeProfiles(profiles);
-  return updated;
-}
-
-export function deleteProfile(id) {
-  const profiles = readProfiles().filter((profile) => profile.id !== id);
-  writeProfiles(profiles);
-  return profiles;
-}
-
-export function duplicateProfile(id) {
-  const profile = getProfile(id);
-  if (!profile) return null;
-
-  const cloned = {
-    ...profile,
-    id: '',
-    slug: '',
-    name: `${profile.name} Copy`,
-    links: profile.links.map((link) => ({ ...link, id: makeId('link') })),
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
-
-  return createProfile(cloned);
 }
