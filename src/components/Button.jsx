@@ -1,0 +1,239 @@
+const STORAGE_KEY = 'nivo.profile.builder.v1';
+
+export const PRESET_LINKS = [
+  'Instagram',
+  'YouTube',
+  'WhatsApp',
+  'Spotify',
+  'Snapchat',
+  'Discord',
+  'X',
+  'Website',
+  'Portfolio',
+  'Google Maps',
+  'Custom Link',
+];
+
+export function makeId(prefix = 'id') {
+  return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2, 10)}`;
+}
+
+export function slugify(value = '') {
+  return String(value)
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 80) || 'profile';
+}
+
+export function createLinkTemplate(title = 'Custom Link') {
+  return {
+    id: makeId('link'),
+    title: title || 'Custom Link',
+    url: '',
+    icon: '',
+    enabled: true,
+  };
+}
+
+export function getInitialProfile() {
+  return {
+    id: '',
+    slug: '',
+    name: '',
+    bio: '',
+    avatar: '',
+    location: '',
+    status: 'LIVE',
+    links: [createLinkTemplate('Instagram')],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+export function normalizeUrl(rawValue = '') {
+  const value = String(rawValue).trim();
+
+  if (!value) return '';
+
+  if (/^[a-zA-Z][a-zA-Z\d+.-]*:/.test(value)) {
+    return value;
+  }
+
+  if (/^@/.test(value)) {
+    return `https://instagram.com/${value.slice(1)}`;
+  }
+
+  if (value.includes('@') && value.includes('.')) {
+    return `mailto:${value}`;
+  }
+
+  if (/^\d[\d\s()+-]*$/.test(value)) {
+    return `tel:${value.replace(/\s+/g, '')}`;
+  }
+
+  if (value.startsWith('www.')) {
+    return `https://${value}`;
+  }
+
+  return `https://${value}`;
+}
+
+export function isExternalUrl(url = '') {
+  return /^https?:\/\//i.test(url) || /^mailto:|^tel:/i.test(url);
+}
+
+export function getInitials(name = '') {
+  const words = String(name).trim().split(/\s+/).filter(Boolean);
+  if (!words.length) return 'N';
+  return words.slice(0, 2).map((word) => word[0]?.toUpperCase() || '').join('');
+}
+
+function readProfiles() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) {
+      const seeded = getSeedProfiles();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(seeded));
+      return seeded;
+    }
+
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    console.error('Failed to read profiles:', error);
+    return [];
+  }
+}
+
+function writeProfiles(profiles) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(profiles));
+}
+
+export function getSeedProfiles() {
+  return [
+    {
+      id: 'profile-noah',
+      slug: 'noah-baker',
+      name: 'Noah Baker',
+      bio: 'Creative strategist / music / visual systems',
+      avatar:
+        'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80',
+      location: 'London, UK',
+      status: 'LIVE',
+      links: [
+        { id: 'link-1', title: 'Instagram', url: 'https://instagram.com/noahbaker', icon: 'IG', enabled: true },
+        { id: 'link-2', title: 'YouTube', url: 'https://youtube.com/@noahbaker', icon: 'YT', enabled: true },
+        { id: 'link-3', title: 'WhatsApp', url: 'https://wa.me/447700000000', icon: 'WA', enabled: true },
+        { id: 'link-4', title: 'Spotify', url: 'https://open.spotify.com/artist/123', icon: 'SP', enabled: true },
+      ],
+      createdAt: '2026-07-10T12:00:00.000Z',
+      updatedAt: '2026-09-18T11:15:00.000Z',
+    },
+    {
+      id: 'profile-mila',
+      slug: 'mila-ross',
+      name: 'Mila Ross',
+      bio: 'Photographer / journal / motion',
+      avatar:
+        'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=80',
+      location: 'Paris, FR',
+      status: 'SIGNAL',
+      links: [
+        { id: 'link-5', title: 'Portfolio', url: 'https://milaross.studio', icon: 'PF', enabled: true },
+        { id: 'link-6', title: 'Instagram', url: 'https://instagram.com/mila.ross', icon: 'IG', enabled: true },
+        { id: 'link-7', title: 'Discord', url: 'https://discord.com', icon: 'DC', enabled: false },
+      ],
+      createdAt: '2026-08-01T10:30:00.000Z',
+      updatedAt: '2026-09-29T15:20:00.000Z',
+    },
+  ];
+}
+
+export function ensureUniqueSlug(candidate = '', excludeId = null) {
+  const base = slugify(candidate || 'profile');
+  const profiles = readProfiles();
+  let slug = base;
+  let suffix = 1;
+
+  while (profiles.some((profile) => profile.id !== excludeId && profile.slug === slug)) {
+    slug = `${base}-${suffix}`;
+    suffix += 1;
+  }
+
+  return slug;
+}
+
+export function getProfiles() {
+  return readProfiles();
+}
+
+export function getProfile(id) {
+  return readProfiles().find((profile) => profile.id === id) ?? null;
+}
+
+export function getProfileBySlug(slug) {
+  const normalized = slugify(slug);
+  return readProfiles().find((profile) => slugify(profile.slug) === normalized) ?? null;
+}
+
+export function createProfile(profile) {
+  const profiles = readProfiles();
+  const cleanProfile = {
+    ...profile,
+    id: profile.id || makeId('profile'),
+    slug: ensureUniqueSlug(profile.slug || profile.name || 'profile'),
+    links: Array.isArray(profile.links) ? profile.links : [],
+    createdAt: profile.createdAt || new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+
+  profiles.push(cleanProfile);
+  writeProfiles(profiles);
+  return cleanProfile;
+}
+
+export function updateProfile(profile) {
+  const profiles = readProfiles();
+  const index = profiles.findIndex((item) => item.id === profile.id);
+
+  if (index === -1) {
+    return createProfile(profile);
+  }
+
+  const updated = {
+    ...profiles[index],
+    ...profile,
+    slug: ensureUniqueSlug(profile.slug || profiles[index].slug || profile.name || 'profile', profile.id),
+    links: Array.isArray(profile.links) ? profile.links : profiles[index].links,
+    updatedAt: new Date().toISOString(),
+  };
+
+  profiles[index] = updated;
+  writeProfiles(profiles);
+  return updated;
+}
+
+export function deleteProfile(id) {
+  const profiles = readProfiles().filter((profile) => profile.id !== id);
+  writeProfiles(profiles);
+  return profiles;
+}
+
+export function duplicateProfile(id) {
+  const profile = getProfile(id);
+  if (!profile) return null;
+
+  const cloned = {
+    ...profile,
+    id: '',
+    slug: '',
+    name: `${profile.name} Copy`,
+    links: profile.links.map((link) => ({ ...link, id: makeId('link') })),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+
+  return createProfile(cloned);
+}
